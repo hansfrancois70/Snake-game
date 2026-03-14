@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Snake Game</title>
+
+<style>
+
+body{
+background:#111;
+color:white;
+text-align:center;
+font-family:Arial;
+}
+
+canvas{
+background:black;
+border:3px solid white;
+margin-top:20px;
+}
+
+#menu, #gameOver{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:#222;
+padding:30px;
+border-radius:10px;
+}
+
+button{
+padding:10px 20px;
+font-size:16px;
+cursor:pointer;
+}
+
+#gameOver{
+display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>🐍 Snake Game</h1>
+
+<div id="menu">
+<h2>Start Game</h2>
+<button onclick="startGame()">Play</button>
+</div>
+
+<div id="gameOver">
+<h2>Game Over</h2>
+<p id="finalScore"></p>
+<button onclick="restartGame()">Restart</button>
+</div>
+
+<p id="score">Score: 0</p>
+
+<canvas id="game" width="400" height="400"></canvas>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let grid = 20;
+let count = 0;
+let score = 0;
+let running = false;
+
+let snake;
+let apple;
+
+function init(){
+
+snake = {
+x:160,
+y:160,
+dx:grid,
+dy:0,
+cells:[],
+maxCells:4
+};
+
+apple = {
+x:320,
+y:320
+};
+
+score = 0;
+document.getElementById("score").innerText = "Score: 0";
+
+}
+
+function startGame(){
+
+document.getElementById("menu").style.display = "none";
+running = true;
+init();
+
+}
+
+function restartGame(){
+
+document.getElementById("gameOver").style.display = "none";
+running = true;
+init();
+
+}
+
+function gameOver(){
+
+running = false;
+document.getElementById("gameOver").style.display = "block";
+document.getElementById("finalScore").innerText = "Score: " + score;
+
+}
+
+function randomPos(){
+
+return Math.floor(Math.random()*20)*grid;
+
+}
+
+function loop(){
+
+requestAnimationFrame(loop);
+
+if(!running) return;
+
+if(++count < 4) return;
+
+count = 0;
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+snake.x += snake.dx;
+snake.y += snake.dy;
+
+if(snake.x < 0 || snake.x >= canvas.width || snake.y < 0 || snake.y >= canvas.height){
+
+gameOver();
+return;
+
+}
+
+snake.cells.unshift({x:snake.x,y:snake.y});
+
+if(snake.cells.length > snake.maxCells){
+
+snake.cells.pop();
+
+}
+
+ctx.fillStyle="red";
+ctx.fillRect(apple.x,apple.y,grid-1,grid-1);
+
+ctx.fillStyle="lime";
+
+snake.cells.forEach(function(cell,index){
+
+ctx.fillRect(cell.x,cell.y,grid-1,grid-1);
+
+if(cell.x === apple.x && cell.y === apple.y){
+
+snake.maxCells++;
+score++;
+
+document.getElementById("score").innerText = "Score: "+score;
+
+apple.x = randomPos();
+apple.y = randomPos();
+
+}
+
+for(let i=index+1;i<snake.cells.length;i++){
+
+if(cell.x === snake.cells[i].x && cell.y === snake.cells[i].y){
+
+gameOver();
+
+}
+
+}
+
+});
+
+}
+
+document.addEventListener("keydown", function(e){
+
+if(e.key==="ArrowLeft" && snake.dx===0){
+
+snake.dx=-grid;
+snake.dy=0;
+
+}
+
+else if(e.key==="ArrowUp" && snake.dy===0){
+
+snake.dy=-grid;
+snake.dx=0;
+
+}
+
+else if(e.key==="ArrowRight" && snake.dx===0){
+
+snake.dx=grid;
+snake.dy=0;
+
+}
+
+else if(e.key==="ArrowDown" && snake.dy===0){
+
+snake.dy=grid;
+snake.dx=0;
+
+}
+
+});
+
+init();
+requestAnimationFrame(loop);
+
+</script>
+
+</body>
+</html>
